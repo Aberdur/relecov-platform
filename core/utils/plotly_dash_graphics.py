@@ -58,7 +58,9 @@ def dash_bar_lab(option_list, data):
     global _SAMPLE_PER_LAB_OPTIONS, _SAMPLE_PER_LAB_DATA
 
     _SAMPLE_PER_LAB_OPTIONS = []
-    _SAMPLE_PER_LAB_DATA = data.copy() if isinstance(data, pd.DataFrame) else pd.DataFrame()
+    _SAMPLE_PER_LAB_DATA = (
+        data.copy() if isinstance(data, pd.DataFrame) else pd.DataFrame()
+    )
 
     options = []
     seen_values = set()
@@ -137,7 +139,11 @@ def _ensure_sample_per_lab_app():
     def update_graph(select_collecting_inst):
         if not select_collecting_inst:
             raise PreventUpdate
-        df = _SAMPLE_PER_LAB_DATA.copy() if not _SAMPLE_PER_LAB_DATA.empty else pd.DataFrame()
+        df = (
+            _SAMPLE_PER_LAB_DATA.copy()
+            if not _SAMPLE_PER_LAB_DATA.empty
+            else pd.DataFrame()
+        )
         selected = str(select_collecting_inst)
         if "lab_code_1" in df.columns:
             mask = df["lab_code_1"].fillna("").astype(str) == selected
