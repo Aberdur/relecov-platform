@@ -48,9 +48,17 @@ mi_template = go.layout.Template(
     )
 )
 
+_SAMPLE_PER_LAB_APP = None
+_SAMPLE_PER_LAB_OPTIONS = []
+_SAMPLE_PER_LAB_DATA = pd.DataFrame()
+
 
 def dash_bar_lab(option_list, data):
     """Build the Dash app that renders weekly sample counts per laboratory."""
+    global _SAMPLE_PER_LAB_OPTIONS, _SAMPLE_PER_LAB_DATA
+
+    _SAMPLE_PER_LAB_OPTIONS = []
+    _SAMPLE_PER_LAB_DATA = data.copy() if isinstance(data, pd.DataFrame) else pd.DataFrame()
 
     options = []
     seen_values = set()
@@ -70,45 +78,66 @@ def dash_bar_lab(option_list, data):
         seen_values.add(value)
         options.append({"label": label or value, "value": value})
 
-    app = DjangoDash(
+    _SAMPLE_PER_LAB_OPTIONS = options
+    _ensure_sample_per_lab_app()
+    return
+
+
+def _ensure_sample_per_lab_app():
+    """Ensure the Dash app is registered in-process.
+
+    django-plotly-dash keeps stateless apps in a per-process registry. If the app
+    is created dynamically during a page render and the subsequent iframe request
+    lands in a different process, the registry lookup can fail. By creating the
+    app once (on-demand) and keeping it registered, we avoid KeyError lookups.
+    """
+    global _SAMPLE_PER_LAB_APP
+    if _SAMPLE_PER_LAB_APP is not None:
+        return _SAMPLE_PER_LAB_APP
+
+    _SAMPLE_PER_LAB_APP = DjangoDash(
         "samplePerLabGraphic",
         external_stylesheets=[
             "https://fonts.googleapis.com/css2?family=Oxanium&display=swap",
             "/static/core/css/dash_style.css",
         ],
     )
+
     empty_fig = px.bar(x=[0], y=[0], height=300)
 
-    default_value = options[0]["value"] if options else None
+    def serve_layout():
+        current_options = _SAMPLE_PER_LAB_OPTIONS
+        current_default = current_options[0]["value"] if current_options else None
+        return html.Div(
+            [
+                html.H4("Select the laboratory", style={"fontFamily": "Oxanium"}),
+                html.Div(
+                    [
+                        dcc.Dropdown(
+                            id="select_collecting_inst",
+                            options=current_options,
+                            clearable=False,
+                            multi=False,
+                            value=current_default,
+                            style={"width": "400px"},
+                        ),
+                    ]
+                ),
+                html.Br(),
+                dcc.Graph(id="bar_graph", figure=empty_fig),
+            ]
+        )
 
-    app.layout = html.Div(
-        [
-            html.H4("Select the laboratory", style={"fontFamily": "Oxanium"}),
-            html.Div(
-                [
-                    dcc.Dropdown(
-                        id="select_collecting_inst",
-                        options=options,
-                        clearable=False,
-                        multi=False,
-                        value=default_value,
-                        style={"width": "400px"},
-                    ),
-                ]
-            ),
-            html.Br(),
-            dcc.Graph(id="bar_graph", figure=empty_fig),
-        ]
-    )
+    _SAMPLE_PER_LAB_APP.layout = serve_layout
 
-    @app.callback(
+    @_SAMPLE_PER_LAB_APP.callback(
         Output("bar_graph", "figure"),
         Input("select_collecting_inst", "value"),
     )
     def update_graph(select_collecting_inst):
         if not select_collecting_inst:
             raise PreventUpdate
-        df = data.copy()
+        df = _SAMPLE_PER_LAB_DATA.copy() if not _SAMPLE_PER_LAB_DATA.empty else pd.DataFrame()
         selected = str(select_collecting_inst)
         if "lab_code_1" in df.columns:
             mask = df["lab_code_1"].fillna("").astype(str) == selected
@@ -157,3 +186,5 @@ def dash_bar_lab(option_list, data):
             yaxis_title="Number of samples",
         )
         return graph
+
+    return _SAMPLE_PER_LAB_APP
