@@ -1,0 +1,31 @@
+### Installation path
+INSTALL_PATH='/opt/relecov-platform'
+PROJECT_NAME='relecov_platform'
+REQUIRED_MODULES='core dashboard docs'
+MIGRATION_MODULES='core dashboard django_plotly_dash'
+
+### Python installation path
+PYTHON_BIN_PATH='/usr/bin/python3'
+
+### Settings required to access database
+DB_USER='relecov_user'
+DB_PASS='ddbb-pwd'
+DB_NAME='ddbb-name'
+DB_SERVER_IP='host.docker.internal'
+DB_PORT=3306
+
+### Settings required for accessing relecov-platform
+LOCAL_SERVER_IP='127.0.0.1'
+DNS_URL='localhost'
+SUPERUSER='admin'
+
+### Email settings
+EMAIL_HOST_SERVER='localhost'
+EMAIL_PORT=25
+EMAIL_HOST_USER=''
+EMAIL_HOST_PASSWORD=''
+EMAIL_USE_TLS=False
+
+### Logs settings
+LOG_TYPE="regular_folder"
+LOG_PATH=""
