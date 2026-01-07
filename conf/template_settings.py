@@ -15,7 +15,14 @@ SECRET_KEY = "PLACEHOLDER"
 # SECURITY WARNING: don"t run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "localserverip", "dns_url"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "localserverip",
+    "dns_url",
+    "host.docker.internal",
+    "*",
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -40,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -129,6 +137,9 @@ USE_L10N = True
 
 USE_TZ = False
 
+REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
+
 ASGI_APPLICATION = "relecov_platform.routing.application"
 
 CHANNEL_LAYERS = {
@@ -136,7 +147,7 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [
-                ("127.0.0.1", 6379),
+                (REDIS_HOST, REDIS_PORT),
             ],
         },
     }
@@ -169,6 +180,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "documents/")
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+# Serve static files in production via WhiteNoise
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
 LOGIN_REDIRECT_URL = "/intranet/"
