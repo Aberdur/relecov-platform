@@ -24,3 +24,4 @@ xlrd==1.2.0
 folium==0.19.4
 django-crontab==0.7.1
 ridgeplot==0.3.1
+whitenoise==6.7.0
