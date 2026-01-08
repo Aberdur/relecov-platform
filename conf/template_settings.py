@@ -21,7 +21,6 @@ ALLOWED_HOSTS = [
     "localserverip",
     "dns_url",
     "host.docker.internal",
-    "*",
 ]
 
 # Application definition

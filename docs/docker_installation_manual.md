@@ -75,7 +75,7 @@ DB_PASS=<clave_lims>
 - Si quieres otros puertos, cambia los `ports` en el compose de cada servicio.
 
 ## 4. Ajusta ALLOWED_HOSTS si lo necesitas
-En `relecov-platform/conf/template_settings.py` ya se incluye `localhost`, `host.docker.internal`, `*`. Si deseas limitarlo, añade ahí los hostnames que vayas a usar.
+En `relecov-platform/conf/template_settings.py` ya se incluye `localhost` y `host.docker.internal`. Si deseas limitarlo, añade ahí los hostnames que vayas a usar.
 En `~/iskylims/conf/template_settings.txt` (repo iSkyLIMS), revisa `ALLOWED_HOSTS` y añade `iskylims_app`, `localhost`, el dominio/IP que uses.
 
 ## 5. Configura Apache del host (solo si vas a usarlo)
@@ -144,7 +144,7 @@ docker compose exec -T app bash -lc \
 
 ## 13. Problemas típicos y soluciones
 - **No conecta a la DB**: revisa que MySQL escuche en 0.0.0.0, la IP/puerto en los settings y que el usuario tenga permisos desde `%`.
-- **DisallowedHost**: añade el host usado a `ALLOWED_HOSTS` (ya incluimos `localhost`, `host.docker.internal` y `*`).
+- **DisallowedHost**: añade el host usado a `ALLOWED_HOSTS` (ya incluimos `localhost` y `host.docker.internal`).
 - **Sin CSS/JS**: ejecuta `collectstatic` (paso 7).
 - **404 en Nextstrain**: la URL apunta a un dataset inexistente; elige una ruta válida de Auspice.
 - **Error KeyError: Unable to find stateless DjangoApp**: con `django-plotly-dash`, los Dash apps se registran en memoria del proceso; si usas múltiples workers de Gunicorn puede fallar. En el Dockerfile se usa `--workers 1` para evitarlo.
