@@ -16,16 +16,19 @@ RUN set -eux; \
       sleep 5; \
     done; \
     apt-get install -y --no-install-recommends \
-      apt-utils wget git lsb-release \
+      git lsb-release \
       python3 python3-dev python3-pip python3-venv python3-wheel \
-      libmysqlclient-dev libpq-dev \
-      libxml2 libxml2-dev libxslt1-dev \
-      gnuplot pkg-config rsync && \
+      libmysqlclient-dev \
+      build-essential \
+      apache2-dev pkg-config rsync && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /srv/relecov-platform
 COPY . /srv/relecov-platform
+
+RUN export MYSQLCLIENT_CFLAGS="$(pkg-config --libs mysqlclient)" && \
+    export MYSQLCLIENT_LDFLAGS="$(pkg-config --cflags mysqlclient)"
 
 # Install Django project into the image
 ARG INSTALL_TYPE=full
